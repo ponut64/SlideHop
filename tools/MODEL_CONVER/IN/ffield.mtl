@@ -1,0 +1,12 @@
+# Blender MTL File: 'more_builds.blend'
+# Material Count: 1
+
+newmtl MESH_ffield
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.492477 0.709768 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.252632
+illum 2
