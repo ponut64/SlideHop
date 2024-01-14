@@ -182,6 +182,30 @@ void	start_menu_layer(__basic_menu * mnu)
 			you.startPos[X] = you.pos[X];
 			you.startPos[Y] = you.pos[Y];
 			you.startPos[Z] = you.pos[Z];
+			start_hud_event(EVENT_RESET_SET);
+			
+			//Next, we have to consider all objects of the GHOST type.
+			//Because it is a different ETYPE, it must be handled separately.
+			//This moves the "marker" object near the player's start position.
+			_declaredObject * someGHOSTdata = get_first_in_object_list(GHOST);
+			
+			while(someGHOSTdata != &dWorldObjects[objNEW])
+			{
+				unsigned short * edata = &someGHOSTdata->type.ext_dat;
+				
+				if(GET_OBJECT_TYPE(*edata) == MARKER_OBJECT)
+				{
+					//Move the marker to the player's current reset point.
+					someGHOSTdata->pos[X] = -you.startPos[X];
+					someGHOSTdata->pos[Y] = -you.startPos[Y];
+					someGHOSTdata->pos[Z] = -you.startPos[Z];
+					someGHOSTdata->pix[X] = (someGHOSTdata->pos[X]>>16) / CELL_SIZE_INT;
+					someGHOSTdata->pix[Y] = (someGHOSTdata->pos[Z]>>16) / CELL_SIZE_INT;
+				}
+		
+				someGHOSTdata = step_linked_object_list(someGHOSTdata);
+			}	
+			
 			}
 			break;
 			case(1):
@@ -263,6 +287,43 @@ void	levelselect_menu_layer(__basic_menu * mnu)
 	//Some stuff about the level, but for now:
 	//nbg_sprintf(2, 10, "Level:(%i)", levelSelect);
 	spr_sprintf(16, 120, "Level:(%i)", levelSelect);
+	
+	switch(levelSelect)
+	{
+		case(0):
+		spr_sprintf(12, 100, "Intro Level");
+		break;
+		case(1):
+		spr_sprintf(12, 100, "Risky Sighway");
+		break;
+		case(2):
+		spr_sprintf(12, 88, "Vaporwave\n Hills");
+		break;
+		case(3):
+		spr_sprintf(12, 88, "Blood Eagle\n Bluffs");
+		break;
+		case(4):
+		spr_sprintf(12, 100, "Sanic Canyon");
+		break;
+		case(5):
+		spr_sprintf(12, 88, "Gambling\n Spiral");
+		break;
+		case(6):
+		spr_sprintf(12, 100, "Vapor Pain");
+		break;
+		case(7):
+		spr_sprintf(12, 88, "Phoenix\n Knot");
+		break;
+		case(8):
+		spr_sprintf(12, 100, "Tutorial");
+		break;
+		case(9):
+		spr_sprintf(12, 100, "XTREME SKI");
+		break;
+		default:
+		spr_sprintf(12, 100, "Huh?");
+		break;
+	}
 	
 }
 
@@ -351,7 +412,7 @@ void	options_menu_layer(__basic_menu * mnu)
 	spr_sprintf(200, 124, "Auto Cam OFF");
 	}
 	
-	spr_sprintf(180, 146, "Y inc, B dec, A reset");
+	spr_sprintf(180, 52, "Y inc, B dec, A reset");
 	
 }
 
@@ -369,7 +430,7 @@ void	options_menu_layer_2(__basic_menu * mnu)
 	mnu->backColor = 42 + (64 * 2);
 	mnu->optionColor = 5;
 	static char * option_list[] = {"<- Back", "Camera Accel", "Cam Spd Cap",
-									"Lockout Time", "<emp>"};
+									"Lockout Time", "Invert Vertical"};
 	mnu->option_text = option_list;
 	
 	if(is_key_release(DIGI_A))
@@ -390,7 +451,7 @@ void	options_menu_layer_2(__basic_menu * mnu)
 			usrCntrlOption.lockoutTime = 1<<16;
 			break;
 			case(4):
-
+			usrCntrlOption.invert = (usrCntrlOption.invert) ? 0 : 1;
 			break; 
 			default:
 			break;
@@ -463,7 +524,14 @@ void	options_menu_layer_2(__basic_menu * mnu)
 	
 	spr_sprintf(200, 124, "%i", usrCntrlOption.lockoutTime);
 	
-	spr_sprintf(180, 146, "Y inc, B dec, A reset");
+	if(usrCntrlOption.invert == 0)
+	{
+	spr_sprintf(180, 148, "No (Y up/B dwn)");
+	} else {
+	spr_sprintf(180, 148, "Yes (Y dwn/B up)");
+	}
+	
+	spr_sprintf(180, 52, "Y inc, B dec, A reset");
 	
 }
 
@@ -1552,6 +1620,27 @@ void	init_hud_events(void)
 	event->colorBank = 1<<6;
 	event->text_lines = 3;
 	event->text_width = 31;
+	
+	event = &hudEvents[EVENT_RESET_SET];
+	
+	event->startPos[X] = 352>>1;
+	event->startPos[Y] = 224>>1;
+	event->endPos[X] = 352>>1;
+	event->endPos[Y] = 224>>1;
+	event->eventTime = 1<<16; 
+	event->spriteTime = 1<<16; //One second
+	event->screenStep = 10;
+	
+	event->soundType = PCM_PROTECTED;
+	event->soundNum = snd_flagflap;
+	event->volume = 6;
+	
+	event->texno = EVENT_SHOW_TEXT;
+	static char resSettxt[] = "Reset Point Set!";
+	event->text = &resSettxt[0];
+	event->colorBank = 2<<6;
+	event->text_lines = 1;
+	event->text_width = 16;
 	
 }
 
