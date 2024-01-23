@@ -44,7 +44,7 @@
 
 /*
 ///////////////////////////////////////////////////////////////
-bitflag orientation for OBJECT:
+bitflag orientation for OBJECT (also applies to GHOST):
 	_sobject
 		entity_ID
 			Drawn entity ID for the item.
@@ -57,6 +57,7 @@ bitflag orientation for OBJECT:
 				#0: Normal collidable object.
 				#1: Ladder climbable object
 				#2: Free-climbable object
+				etc...
 			3-1: Reserved for type-specific data
 			0: Enable/disable flag. If 1, the object will not be displayed or collided with at all.
 		radius
@@ -83,6 +84,7 @@ bitflag orientation for OBJECT:
 #define FORCEFIELD_REMOTE	(0x040)
 #define CRUSH_BLOCK_SLOW	(0x050)
 #define BOOST_BLOCK_OBJECT	(0x060)
+#define MARKER_OBJECT		(0x070)
 
 #define OBJECT_FLAGS		(0xE)
 #define OBJECT_RESET		(0x7FF0)

@@ -66,6 +66,7 @@
 #define SIGN_17					(39)
 #define SIGN_18					(40)
 #define SIGN_19					(42)
+#define EVENT_RESET_SET			(43)
 //More events for track win, track fail, flag taken, flag return, flag cap, etc
 	// HUD Event
 	// What do I need it to do?

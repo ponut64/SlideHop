@@ -34,6 +34,7 @@ extern int snd_ring4;
 extern int snd_ring5;
 extern int snd_ring6;
 extern int snd_ring7;
+extern int snd_flagflap;
 extern Sint8 * stmsnd[64];
 extern int snd_win;
 extern int snd_freturn;

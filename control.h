@@ -16,6 +16,7 @@ typedef struct {
 	int lockoutTime;
 	int lockTimer;
 	int lockout;
+	int invert;
 } _controlOptions;
 
 extern _controlOptions usrCntrlOption;

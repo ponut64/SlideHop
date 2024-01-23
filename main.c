@@ -51,6 +51,44 @@ void * HWRAM_ldptr;
 void * HWRAM_hldptr;
 //
 
+
+/*
+
+1.2 To-Do List
+
+1 - check
+2 - check 
+3 - check
+4 - check, different solution applied
+5 - check
+6 - i just made it transparent, should be enough
+
+8 - check, just a name is fine
+9 - check
+10 - different solution applied
+11 - check
+12 - check
+
+1. Patch level 2 to fix the backwards rotated overhang and the ungettable ring							
+2. Add option to invert camera
+3. Adjust the camera when jumping and holding UP to look further forward
+	- Need to base this on Y input control angle, not just UP (because analog)
+4. Start the smart camera lockout timer when holding DOWN, stop it when you press UP (but only after DOWN)
+	- Need to base this on Y input control angle
+5. Holding A will only trigger slide when on the ground / or otherwise decouple slide camera from holding A
+6. Shrink / move / adjust the flag so it isn't in your face when you have it
+
+7. Try to push the camera where you are facing a little more past your turn when you are turning
+
+8. Add a name / image to each level in menu
+9. Add an indication that the reset point has been successfully set (sound effect + event)
+10. Stop the movement smart cam when no buttons are pressed
+11. Fix up the "Greece" assets to reduce Z-fighting
+12. fix the strafe cam
+
+*/
+
+
 //
 short * division_table;
 
@@ -135,6 +173,7 @@ void	load_test(void)
 	snd_ring5 = load_8bit_pcm((Sint8*)"CRING5.PCM", 7680);
 	snd_ring6 = load_8bit_pcm((Sint8*)"CRING6.PCM", 7680);
 	snd_ring7 = load_8bit_pcm((Sint8*)"CRING7.PCM", 7680);
+	snd_flagflap = load_8bit_pcm((Sint8*)"FLAGFLAP.PCM", 15360);
 	baseRingMenuTexno = numTex;
 	WRAP_NewTable((Sint8*)"RINGNUM.TGA", (void*)dirty_buf, 0);
 	flagIconTexno = numTex;
@@ -170,6 +209,8 @@ void	load_test(void)
 	WRAP_NewTable((Sint8*)"ARROW2.TGA", (void*)dirty_buf, 24);  
 	animated_texture_list[7] = numTex;
 	WRAP_NewTable((Sint8*)"ARROW3.TGA", (void*)dirty_buf, 24);  
+	animated_texture_list[8] = numTex;
+	WRAP_NewTable((Sint8*)"FFIELD.TGA", (void*)dirty_buf, 24);  
 	
 	/////////////////////////////////////
 	// Floor / heightmap textures
@@ -194,6 +235,7 @@ void	load_test(void)
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"WINGS.GVP", 		HWRAM_ldptr, &wings,	    GV_SORT_CEN, MODEL_TYPE_PLAYER, NULL);
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"SHADOW.GVP", 		HWRAM_ldptr, &shadow,	    GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL);
 	
+	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"MARKER.GVP",		HWRAM_ldptr, &entities[8], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING1.GVP",		HWRAM_ldptr, &entities[1], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING2.GVP",		HWRAM_ldptr, &entities[2], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING3.GVP",		HWRAM_ldptr, &entities[3], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
@@ -202,11 +244,11 @@ void	load_test(void)
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING6.GVP",		HWRAM_ldptr, &entities[6], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING7.GVP",		HWRAM_ldptr, &entities[7], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	
+	
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"KYOOB.GVP",		HWRAM_ldptr, &entities[9], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"PLATF00.GVP",		HWRAM_ldptr, &entities[10], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"FLAG.GVP",			HWRAM_ldptr, &entities[57], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
-	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"FFIELD.GVP",		HWRAM_ldptr, &entities[55], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"SIGN.GVP",			HWRAM_ldptr, &entities[36], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL);
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"ARBOX.GVP",		HWRAM_ldptr, &entities[37], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL);
@@ -215,6 +257,7 @@ void	load_test(void)
 	
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"TEST00.GVP",		HWRAM_ldptr, &entities[0], GV_SORT_CEN, MODEL_TYPE_TPACK, NULL);
 		
+	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"FFIELD.GVP",		HWRAM_ldptr, &entities[55], GV_SORT_CEN, MODEL_TYPE_NORMAL, &entities[0]); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"BRIDGE1.GVP",		HWRAM_ldptr, &entities[11], GV_SORT_CEN, MODEL_TYPE_BUILDING, &entities[0]);
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"GREECE01.GVP",		HWRAM_ldptr, &entities[12], GV_SORT_CEN, MODEL_TYPE_BUILDING, &entities[0]);
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"GREECE02.GVP",		HWRAM_ldptr, &entities[13], GV_SORT_CEN, MODEL_TYPE_BUILDING, &entities[0]);

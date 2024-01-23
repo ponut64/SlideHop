@@ -1291,7 +1291,7 @@ void	manage_track_data(_declaredObject * someLDATA)
 			you.points += 10 * someLDATA->pix[X];
 			//pcm_play(snd_win, PCM_PROTECTED, 5);
 			//start_adx_stream(stmsnd[stm_win], 5);
-			if((someLDATA->dist) <= (you.parTime<<15))
+			if((someLDATA->dist) <= ((you.parTime<<15) + 32768))
 			{
 				start_hud_event(TRACK_GOLD_EVENT);
 			} else if((someLDATA->dist) <= (you.parTime<<16))
@@ -1601,6 +1601,7 @@ void	manage_object_data(void)
 		someOBJECTdata = step_linked_object_list(someOBJECTdata);
 	}
 	
+
 }
 
 
