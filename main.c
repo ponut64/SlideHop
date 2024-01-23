@@ -244,6 +244,7 @@ void	load_test(void)
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING6.GVP",		HWRAM_ldptr, &entities[6], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"RING7.GVP",		HWRAM_ldptr, &entities[7], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	
+	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"MARKER.GVP",		HWRAM_ldptr, &entities[8], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"KYOOB.GVP",		HWRAM_ldptr, &entities[9], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
 	HWRAM_ldptr = gvLoad3Dmodel((Sint8*)"PLATF00.GVP",		HWRAM_ldptr, &entities[10], GV_SORT_CEN, MODEL_TYPE_NORMAL, NULL); 
