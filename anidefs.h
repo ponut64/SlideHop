@@ -319,5 +319,25 @@ void	anim_defs(void)
 	arrow3.curKeyFrm = 0;
 	arrow3.startFrm = 0;
 	arrow3.endFrm = 3;
+	
+	static Uint8 field_lumas[4];
+	static Uint8 field_arates[4];
+	field.lifetime = 3000<<16;
+	field.arates = &field_arates[0];
+	field.lumas = &field_lumas[0];
+	field.arates[0] = 120;
+	field.arates[1] = 6;
+	field.arates[2] = 6;
+	field.arates[3] = 6;
+	field.lumas[0] = 0;
+	field.lumas[1] = 64;
+	field.lumas[2] = 255;
+	field.lumas[3] = 64;
+	field.sprite_sheet_start = animated_texture_list[8];
+	field.sprite_sheet_end = field.sprite_sheet_start + 4;
+	field.curFrm = 0;
+	field.curKeyFrm = 0;
+	field.startFrm = 0;
+	field.endFrm = 4;
 
 }

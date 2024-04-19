@@ -82,6 +82,7 @@ spriteAnimation LeyeAnim;
 spriteAnimation ReyeAnim;
 spriteAnimation arrow2;
 spriteAnimation arrow3;
+spriteAnimation field;
 
 void	computeLight(void)
 {
@@ -635,6 +636,7 @@ void	master_draw(void)
 	start_texture_animation(&ReyeAnim, &pl_model);
 	start_texture_animation(&arrow2, &entities[46]);
 	start_texture_animation(&arrow3, &entities[46]);
+	start_texture_animation(&field, &entities[55]);
 	operate_texture_animations();
 
 	time_at_end = get_time_in_frame();

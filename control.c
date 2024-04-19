@@ -21,7 +21,7 @@ int fixPlyrRot;
 int fixCtrlRot;
 
 _controlOptions usrCntrlOption = {.followForce = 1<<16, .cameraAccel = 45, .cameraCap = 0,
-									.movementCam = 1, .facingCam = 1, .lockoutTime = 1<<16};
+									.movementCam = 1, .facingCam = 1, .lockoutTime = 1<<16, .invert = 0};
 
 Bool holdCam = false;
 Bool usePolyLine = false;
@@ -32,22 +32,27 @@ Bool usePolyLine = false;
 //	are to be used as arrow key / WADS arrangement for camera movement.
 void controls(void)
 {
-	if(is_key_down(DIGI_X)){
+	int camYdelta = 0;
+	if(is_key_down(DIGI_X))
+	{
 		you.rotState[X] -= usrCntrlOption.cameraAccel * framerate; //Look/turn left
 		usrCntrlOption.lockTimer = usrCntrlOption.lockoutTime;
 	}
-	if(is_key_down(DIGI_B)){
-
-		you.rotState[Y] -= usrCntrlOption.cameraAccel * framerate; //Look down
+	if(is_key_down(DIGI_B))
+	{
+		camYdelta = (usrCntrlOption.invert) ? usrCntrlOption.cameraAccel * framerate : -usrCntrlOption.cameraAccel * framerate;
+		you.rotState[Y] += camYdelta; //Look down
 		usrCntrlOption.lockTimer = usrCntrlOption.lockoutTime;
 	}
-	if(is_key_down(DIGI_Z)){
+	if(is_key_down(DIGI_Z))
+	{
 		you.rotState[X] += usrCntrlOption.cameraAccel * framerate; //Look/turn right
 		usrCntrlOption.lockTimer = usrCntrlOption.lockoutTime;
 	}
 	if (is_key_down(DIGI_Y))
     {
-		you.rotState[Y] += usrCntrlOption.cameraAccel * framerate; //Look up
+		camYdelta = (usrCntrlOption.invert) ? -usrCntrlOption.cameraAccel * framerate : usrCntrlOption.cameraAccel * framerate;
+		you.rotState[Y] += camYdelta; //Look up
 		usrCntrlOption.lockTimer = usrCntrlOption.lockoutTime;
     }
 	
@@ -138,14 +143,17 @@ void controls(void)
 	{
 		fixCamRot = you.viewRot[Y];
 		fixPlyrRot = you.rot[Y];
-		fixCtrlRot = you.rot2[Y];
+		you.rot2[Y] = 0;
 	}
 	if(is_key_down(DIGI_C))
 	{
-		if(!you.dirInp) you.rot2[Y] = 0;
-		you.rot[Y] = you.rot2[Y] - fixCamRot + fixCtrlRot;
+		//Lock the camera around rot[Y]
 		you.viewRot[Y] = -fixPlyrRot;
+		you.rot[Y] = you.rot2[Y] - you.viewRot[Y];
 		you.viewRot[X] = 0;
+		//Stop the camera from accelerating with C held
+		you.rotState[X] = 0;
+		you.rotState[Y] = 0;
 	} else if(you.dirInp == true)
 	{
 		you.rot[Y] = you.rot2[Y] - you.viewRot[Y];
@@ -154,7 +162,7 @@ void controls(void)
 
 	if(is_key_release(DIGI_C))
 	{
-		you.rot[Y] = fixPlyrRot; 
+		//you.rot[Y] = fixPlyrRot; 
 	}
 	
 
@@ -176,7 +184,7 @@ void controls(void)
 	static FIXED rKeyTimer = 0;
 
 	if(is_key_down(DIGI_A) ){
-		you.setSlide = true;
+		you.jumpHeld = true;
 		if(rKeyTimer <= (66 / framerate))
 		{ 
 			if(you.jumpAllowed == true)
@@ -192,6 +200,7 @@ void controls(void)
 		rKeyTimer++;
 	} else {
 		you.okayStepSnd = true;
+		you.jumpHeld = false;
 		rKeyTimer = 0;
 	}
 	

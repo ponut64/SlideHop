@@ -110,6 +110,7 @@ typedef struct {
 	short cancelTimers;
 	short resetTimers;
 	short jumpAllowed;
+	short jumpHeld;
 	int allowJumpTimer;
 	int sanics;
 	int avg_sanics;

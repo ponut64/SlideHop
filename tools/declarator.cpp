@@ -62,7 +62,8 @@ void	declare_object_at_cell(short pixX, short height, short pixY, short type, sh
 
 void	create_objects(int levelNo)
 {
-	
+	//Always declare the marker :)
+	declare_object_at_cell(0, 0, 0, 8 /*marker*/, 0, 0, 0, 0, 0);
 	if(levelNo == 0)
 	{
 		music1 = "BATLOBBY.MUS";
@@ -347,6 +348,7 @@ void	create_objects(int levelNo)
 	
 	declare_object_at_cell((1660 / 40) + 1, -159, -(980 / 40), 10 /*platf00*/, 0, 0, 0, 0, 0);
 	declare_object_at_cell((1060 / 40) + 1, -251, -(2780 / 40), 10 /*platf00*/, 0, 0, 0, 0, 0);
+	declare_object_at_cell((1420 / 40) + 1, -233, (860 / 40), 10 /*platf00*/, 0, 0, 0, 0, 0);
 	
 	declare_object_at_cell((1060 / 40) + 1, -344, -(1460 / 40), 11 /*bridge1*/, 0, 0, 0, 0, 0);
 	
@@ -365,7 +367,7 @@ void	create_objects(int levelNo)
 	declare_object_at_cell(-(1460 / 40) + 1, -200, -(3020 / 40), 15 /*greece04*/, 0, 0, 0, 0, 0);
 	declare_object_at_cell(-(1100 / 40) + 1, -200, -(3380 / 40), 15 /*greece04*/, 0, 0, 0, 0, 0);
 	
-	declare_object_at_cell((1660 / 40) + 1, -117, -(1820 / 40), 16 /*overhang*/, 15, 0, 0, 0, 0);
+	declare_object_at_cell((1660 / 40) + 1, -117, -(1820 / 40), 16 /*overhang*/, -15, 0, 0, 0, 0);
 	declare_object_at_cell((1020 / 40) + 1, -146, -(220 / 40), 16 /*overhang*/, 0, 135, 0, 0, 0);
 	declare_object_at_cell((60 / 40) + 1, -209, (3180 / 40), 16 /*overhang*/, 0, 0, 0, 0, 0);
 	declare_object_at_cell(-(580 / 40) + 1, -238, (3340 / 40), 16 /*overhang*/, 0, 0, 0, 0, 0);

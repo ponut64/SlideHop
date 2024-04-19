@@ -982,34 +982,52 @@ void	update_hmap(MATRIX msMatrix)
 	
 	if(using_portal)
 	{
-	//Dumb solution: While DSP is crunching the clipping, don't let the SH2 process any polygons.
-	// **IDEALLY** the SH2 could continue crunching polygons.
-	//while(dsp_noti_addr[0] == 0){}
-	//	Another dumb solution:
-	// Whereby the DSP is in progress working on clip flags, the SH2 cannot write any clip flags lest the DSP overwrite them.
-	// Thus we have to have SH2 do screen clipping only after DSP is done.
-	// If my DSP code had program RAM left in it, I'd have it do this.
+
+	/*
+	I'm very unhappy that it has to work this way. This is an awful solution, but it is the only solution.
+	Explanation of why we have to do this:
+	The SCU-DSP and SH2 cannot be allowed to work asynchronously on the clipFlags.
+	They might have been able to do this, provided the SCU-DSP wrote its output to separate list,
+	but then the SH2 would have to go back an reintegrate or otherwise separately check the DSP's list; this is equivalent to below.
+	TRUST ME I TESTED IT.
+	1. They cannot work asynchronously because the SCU-DSP may capture a vertex clipFlag before the SH2 has clipped it,
+	but write it back after the SH2 has clipped it. In this case, the SH2's clip settings will be ignored.
+	2. In another case, the DSP's clipFlags are ignored if the SH2 proceeds to prepare the draw commands before the DSP is done.
+	3. In another case, the DSP's clipFlags are ignored if the DSP sets the flags for a vertex while/before the SH2 is transforming it.
 	
-	volatile int npct = 0;
-	for(dst_pix = 0; dst_pix < (LCL_MAP_PIX * LCL_MAP_PIX); dst_pix++)
-	{
-	       //Screen Clip Flags for on-off screen decimation
-		//Hammertime: If the DSP hasn't checked this vertex yet, wait until it has.
-		int * clipFlag = (int *)(((unsigned int)&msh2VertArea[dst_pix].clipFlag)|UNCACHE);
-		npct = 0;
-		while(!(*clipFlag & DSP_CLIP_CHECK) && npct < 1000)
+	The DSP must set the clipFlags for a vertex after the SH2 has transformed it, but before the SH2 sets any clipFlags.
+	The SH2 must purge the clipFlags after it has finished processing all polygons, and before the next time it processes vertices.
+	The DSP cannot purge the clipFlags, otherwise the SH2 will not have up-to-date information on the DSP's state with the vertices.
+	
+	
+	The DSP's program for clipping vertices, alongside the SH2's, cannot be expected to run at a uniform speed compared to one another.
+	This is because both programs involve a lot of branching code, which does not run at a constant speed.
+
+	This is very sad, because it means the SH2 must work in lock-step with the DSP.
+	It can work the other way around, where the DSP works in lock-step with the SH2 as the leader;
+	This is slower because the SH2 has a faster access to the memory and is ultimately faster than the DSP.
+	
+	*/
+		volatile int npct = 0;
+		for(dst_pix = 0; dst_pix < (LCL_MAP_PIX * LCL_MAP_PIX); dst_pix++)
 		{
-			//If you remove this asm, it doesn't work. NO IDEA WHY.
-			__asm__("nop;");
-			npct++;
+			//Screen Clip Flags for on-off screen decimation
+			//Hammertime: If the DSP hasn't checked this vertex yet, wait until it has.
+			int * clipFlag = (int *)(((unsigned int)&msh2VertArea[dst_pix].clipFlag)|UNCACHE);
+			npct = 0;
+			while(!(*clipFlag & DSP_CLIP_CHECK) && npct < 1000)
+			{
+				//If you remove this asm, it doesn't work. NO IDEA WHY.
+				__asm__("nop;");
+				npct++;
+			}
+			
+			msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[X]) > TV_HALF_WIDTH) ? SCRN_CLIP_X : 0; 
+			msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[X]) < -TV_HALF_WIDTH) ? SCRN_CLIP_NX : msh2VertArea[dst_pix].clipFlag; 
+			msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Y]) > TV_HALF_HEIGHT) ? SCRN_CLIP_Y : msh2VertArea[dst_pix].clipFlag;
+			msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Y]) < -TV_HALF_HEIGHT) ? SCRN_CLIP_NY : msh2VertArea[dst_pix].clipFlag;
+			msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Z]) <= 15<<16) ? CLIP_Z : msh2VertArea[dst_pix].clipFlag;
 		}
-		   
-		msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[X]) > TV_HALF_WIDTH) ? SCRN_CLIP_X : 0; 
-		msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[X]) < -TV_HALF_WIDTH) ? SCRN_CLIP_NX : msh2VertArea[dst_pix].clipFlag; 
-		msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Y]) > TV_HALF_HEIGHT) ? SCRN_CLIP_Y : msh2VertArea[dst_pix].clipFlag;
-		msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Y]) < -TV_HALF_HEIGHT) ? SCRN_CLIP_NY : msh2VertArea[dst_pix].clipFlag;
-		msh2VertArea[dst_pix].clipFlag |= ((msh2VertArea[dst_pix].pnt[Z]) <= 15<<16) ? CLIP_Z : msh2VertArea[dst_pix].clipFlag;
-	}
 	
 	} else {
 		
@@ -1136,11 +1154,10 @@ void	update_hmap(MATRIX msMatrix)
 	
 	//int clipct = 0;
 	//Purge clip flags
-	//Necessary process for DSP use
+	//Necessary process for DSP synchronization 
 	for(int i = 0; i < (LCL_MAP_PIX * LCL_MAP_PIX); i++)
 	{
 		//if(msh2VertArea[i].clipFlag & DSP_CLIP_CHECK) clipct++;
-		//Not sure why I have to do this specifically here; waste of performance...
 		msh2VertArea[i].clipFlag = 0;
 	}
 	

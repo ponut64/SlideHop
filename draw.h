@@ -62,5 +62,5 @@ extern spriteAnimation LeyeAnim;
 extern spriteAnimation ReyeAnim;
 extern spriteAnimation arrow2;
 extern spriteAnimation arrow3;
-
+extern spriteAnimation field;
 

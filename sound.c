@@ -46,6 +46,7 @@
  int snd_ring5;
  int snd_ring6;
  int snd_ring7;
+ int snd_flagflap;
  Sint8 * stmsnd[64];
  int snd_win;
  int snd_freturn;

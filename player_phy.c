@@ -218,13 +218,15 @@ void	smart_cam(void)
 	///////////////////////////////////////////
 	//Smart Camera Setup
 	///////////////////////////////////////////
-	if((you.rot2[Y] > (150 * 182) && you.rot2[Y] < (210 * 182) && you.dirInp) || usrCntrlOption.lockTimer > 0)
+	if(you.rot2[Y] > (150 * 182) && you.rot2[Y] < (210 * 182) && you.dirInp) usrCntrlOption.lockTimer = usrCntrlOption.lockoutTime;
+	if(usrCntrlOption.lockTimer > 0)
 	{
 		usrCntrlOption.lockout = true;
 	}
 	if(usrCntrlOption.lockTimer > 0)
 	{
 		usrCntrlOption.lockTimer -= delta_time;
+		if(you.rot2[Y] > (330 * 182) || you.rot2[Y] < (30 * 182)) usrCntrlOption.lockTimer -= delta_time;
 	}
 	///////////////////////////////////////////
 	// Movement-following camera
@@ -240,7 +242,7 @@ void	smart_cam(void)
 	//angDif_y is an expression of how different the movement vector and viewing vector is,
 	//as it relates to the axis that Y view rotation controls (X and Z).
 	short angDif_y;
-	if(usrCntrlOption.movementCam)
+	if(usrCntrlOption.movementCam && you.sanics > 8192)
 	{
 		if(!you.climbing)
 		{
@@ -276,6 +278,7 @@ void	smart_cam(void)
 				you.viewRot[X] +=  (proportion_x * framerate)>>1;
 			} else {
 				you.viewRot[X] += (proportion_facing_ground * framerate)>>1;
+				if(you.sanics > (1<<16)) you.viewRot[X] += ((proportion_x * framerate)>>2);
 			}
 			
 			usrCntrlOption.lockout = true;
@@ -300,7 +303,8 @@ void	smart_cam(void)
 		//Determines if we want to rotate view clockwise or counterclockwise (and then does)
 		if(!usrCntrlOption.lockout)
 		{
-			you.viewRot[Y] += (angDif_y > 0) ? (proportion_y * framerate)>>1 : -(proportion_y * framerate)>>1; 
+			if(JO_ABS(angDif_y) > (8 * 182)) you.viewRot[Y] += (angDif_y > 0) ? (7 * 182) : -(7 * 102);
+			you.viewRot[Y] += (angDif_y > 0) ? (proportion_y * framerate)>>2 : -(proportion_y * framerate)>>2; 
 			you.viewRot[X] += (proportion_x * framerate)>>1;
 		}
 	}
@@ -475,7 +479,9 @@ void	player_phys_affect(void)
 	}
 
 	smart_cam();
-
+	//This is put here to let you slide on a jump-surface contact, which is forced to occur before a jump is allowed.
+	//But it shall not cause you to emit particles nor be locked in the slide matrix / animations.
+	if(you.jumpHeld) you.setSlide = true;
 	///////////////////////////////////////////////
 	// Velocity Constant Changes
 	///////////////////////////////////////////////
@@ -759,9 +765,9 @@ void	player_phys_affect(void)
 	//De-rating user-input rotation
 	////////////////////////////////////////////////////////////
 	if( is_key_up(DIGI_X) && you.rotState[X] < 0) you.rotState[X] += fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[X]), 16384));//A
-	if( is_key_up(DIGI_B) && you.rotState[Y] < 0) you.rotState[Y] += fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[Y]), 16384));//S
+	if( is_key_up(DIGI_B) && is_key_up (DIGI_Y) && you.rotState[Y] < 0) you.rotState[Y] += fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[Y]), 16384));//S
 	if( is_key_up(DIGI_Z) && you.rotState[X] > 0) you.rotState[X] -= fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[X]), 16384));//D
-	if( is_key_up(DIGI_Y) && you.rotState[Y] > 0) you.rotState[Y] -= fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[Y]), 16384));//W
+	if( is_key_up(DIGI_Y) && is_key_up (DIGI_B) && you.rotState[Y] > 0) you.rotState[Y] -= fxm(time_fixed_scale, fxm(JO_ABS(you.rotState[Y]), 16384));//W
 	////////////////////////////////////////////////////////////
 	//De-rating speed
 	////////////////////////////////////////////////////////////

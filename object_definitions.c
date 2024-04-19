@@ -109,12 +109,12 @@ _sobject Post00 = {
 	.light_bright = 0
 };
 
-_sobject Tladder = {
+_sobject Marker = {
 	.entity_ID = 8,
 	.radius[X] = 0,
 	.radius[Y] = 0,
 	.radius[Z] = 0,
-	.ext_dat = BUILD,
+	.ext_dat = GHOST | MARKER_OBJECT,
 	.light_bright = 0
 };
 
@@ -612,7 +612,7 @@ void	fill_obj_list(void)
 	objList[5] = &FifthRing;
 	objList[6] = &SixthRing;
 	objList[7] = &SeventhRing;
-	objList[8] = &Tladder;
+	objList[8] = &Marker;
 	objList[9] = &Kyoob;
 	objList[10] = &Platf00;
 	objList[11] = &Build00;
