@@ -52,6 +52,7 @@ unsigned short * cRAM_16bm = (unsigned short *)0x05F00000;
 //Screen Erasure Settings
 	unsigned short * VDP1_EWLR = (unsigned short *) (VDP1_VRAM + 0x100008);
 	unsigned short * VDP1_EWRR = (unsigned short *) (VDP1_VRAM + 0x10000A);
+	unsigned short * VDP1_FBCR = (unsigned short *) (VDP1_VRAM + 0x100002);
 
 void	put_pixel_in_8bpp_layer(unsigned char * layer_address, unsigned short x, unsigned short y, unsigned char color_code, unsigned short line_width)
 {
@@ -107,6 +108,8 @@ void	draw_hud_line(short x0, short y0, short x1, short y1, unsigned char color_c
     }
 }
 
+
+
 void	vblank_requirements(void)
 {
 	//nbg_sprintf(0, 15, "(%x)", (int)BACK_CRAM);
@@ -118,8 +121,15 @@ void	vblank_requirements(void)
 	//When type 4: bits 14,13 are priority. bits 12,11,10 are color calc ratio.
 	vdp2_sprMode[0] = 0x0404; //Sprite Data Type Mode (set to 0xF in hi-res mode, 0x4 in standard res mode)
 
+	static int even_odd_scl = 1;
+	
+	even_odd_scl += 1;
+	even_odd_scl &= 0x1;
+
     *VDP1_EWLR = top_left_erase_pt;
     *VDP1_EWRR = btm_rite_erase_pt;
+	*VDP1_FBCR = (0x2 | (even_odd_scl << 4));
+	
 }
 
 extern void * nbg0_page_adr;

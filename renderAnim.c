@@ -267,9 +267,9 @@ void ssh2DrawAnimation(animationControl * animCtrl, entity_t * ent, Bool transpl
 		/**Uncompress the NEXT vertex and apply linear interpolation**/
 		#pragma GCC push_options
 		#pragma GCC diagnostic ignored "-Wsequence-point"
-		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>4))<<8;
-		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>4))<<8;
-		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>4))<<8;
+		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>3))<<8;
+		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>3))<<8;
+		*dst++=( *src + ((( *nxt++ - *src++) * frDelta)>>3))<<8;
 		#pragma GCC pop_options
 		// ** 3 **
         /** Retrieves the result of the division  for CURRENT vertex**/
@@ -472,9 +472,9 @@ void	meshAnimProcessing(animationControl * animCtrl, entity_t * ent, Bool transp
 	/////
 	for(unsigned int i = 0; i < model->nbPoint; i++)
 	{
-		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>4))<<8;
-		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>4))<<8;
-		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>4))<<8;
+		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>3))<<8;
+		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>3))<<8;
+		*dst++=( *src + (( ((*nxt++) - (*src++)) * frDelta)>>3))<<8;
 	}
 
     dst = (Sint32 *)&model->pltbl[0];
